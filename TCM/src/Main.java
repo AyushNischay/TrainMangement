@@ -9,8 +9,8 @@ class Bogie {
         this.capacity = capacity;
     }
 
-    public String getType() {
-        return type;
+    public int getCapacity() {
+        return capacity;
     }
 
     @Override
@@ -32,24 +32,21 @@ class TrainConsistApp {
         bogies.add(new Bogie("AC Chair", 60));
         bogies.add(new Bogie("First Class", 50));
         bogies.add(new Bogie("Sleeper", 80));
-        bogies.add(new Bogie("AC Chair", 65));
 
         System.out.println("Original Bogie List:");
         bogies.forEach(System.out::println);
 
-        // ✅ Grouping bogies by type
-        Map<String, List<Bogie>> groupedBogies = bogies.stream()
-                .collect(Collectors.groupingBy(Bogie::getType));
+        // ✅ Step 1: Extract capacity using map()
+        // ✅ Step 2: Aggregate using reduce()
+        int totalSeats = bogies.stream()
+                .map(Bogie::getCapacity)
+                .reduce(0, Integer::sum);
 
-        // ✅ Display grouped result
-        System.out.println("\nGrouped Bogies by Type:");
-        for (Map.Entry<String, List<Bogie>> entry : groupedBogies.entrySet()) {
-            System.out.println("\nType: " + entry.getKey());
-            entry.getValue().forEach(System.out::println);
-        }
+        // Display result
+        System.out.println("\nTotal Seating Capacity: " + totalSeats);
 
         // Verify original list unchanged
-        System.out.println("\nOriginal List After Grouping (Unchanged):");
+        System.out.println("\nOriginal List After Aggregation (Unchanged):");
         bogies.forEach(System.out::println);
     }
 }
