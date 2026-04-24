@@ -1,57 +1,55 @@
 import java.util.*;
 import java.util.stream.*;
-
 class TrainConsistApp {
-
     public static void main(String[] args) {
-
-        // Sample goods bogies
-        List<GoodsBogie> goodsBogies = new ArrayList<>();
-
-        goodsBogies.add(new GoodsBogie("Cylindrical", "Petroleum"));
-        goodsBogies.add(new GoodsBogie("Rectangular", "Coal"));
-        goodsBogies.add(new GoodsBogie("Open", "Grain"));
-        goodsBogies.add(new GoodsBogie("Cylindrical", "Petroleum"));
-
-        System.out.println("Goods Bogies:");
-        goodsBogies.forEach(System.out::println);
-
-        // ✅ Safety Rule:
-        // Cylindrical bogies must carry ONLY Petroleum
-        boolean isSafe = goodsBogies.stream()
-                .allMatch(b ->
-                        !b.getType().equalsIgnoreCase("Cylindrical")
-                                || b.getCargo().equalsIgnoreCase("Petroleum")
-                );
-
-        // ✅ Result
-        if (isSafe) {
-            System.out.println("\nTrain is SAFETY COMPLIANT ✅");
-        } else {
-            System.out.println("\nTrain is NOT SAFE ❌ (Invalid cargo in Cylindrical bogie)");
+        // ✅ Create large dataset
+        List<Bogie> bogies = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < 100000; i++) {
+            int capacity = 40 + random.nextInt(50); // range: 40–89
+            bogies.add(new Bogie("Passenger", capacity));
         }
+        // -------------------------------
+        // ✅ Loop-based filtering
+        // -------------------------------
+        long loopStart = System.nanoTime();
+        List<Bogie> loopResult = new ArrayList<>();
+        for (Bogie b : bogies) {
+            if (b.getCapacity() > 60) {
+                loopResult.add(b);
+            }
+        }
+        long loopEnd = System.nanoTime();
+        long loopTime = loopEnd - loopStart;
+        // -------------------------------
+        // ✅ Stream-based filtering
+        // -------------------------------
+        long streamStart = System.nanoTime();
+        List<Bogie> streamResult = bogies.stream()
+                .filter(b -> b.getCapacity() > 60)
+                .collect(Collectors.toList());
+        long streamEnd = System.nanoTime();
+        long streamTime = streamEnd - streamStart;
+        // -------------------------------
+        // ✅ Results
+        // -------------------------------
+        System.out.println("Loop Result Size: " + loopResult.size());
+        System.out.println("Stream Result Size: " + streamResult.size());
+        System.out.println("\nLoop Execution Time (ns): " + loopTime);
+        System.out.println("Stream Execution Time (ns): " + streamTime);
+        // ✅ Consistency check
+        System.out.println("\nResults Match: " +
+                (loopResult.size() == streamResult.size()));
     }
 }
-
-class GoodsBogie {
-    String type;   // e.g., Cylindrical, Rectangular, Open
-    String cargo;  // e.g., Petroleum, Coal, Grain
-
-    public GoodsBogie(String type, String cargo) {
+class Bogie {
+    String type;
+    int capacity;
+    public Bogie(String type, int capacity) {
         this.type = type;
-        this.cargo = cargo;
+        this.capacity = capacity;
     }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getCargo() {
-        return cargo;
-    }
-
-    @Override
-    public String toString() {
-        return "Type: " + type + ", Cargo: " + cargo;
+    public int getCapacity() {
+        return capacity;
     }
 }
