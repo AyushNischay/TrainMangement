@@ -1,35 +1,57 @@
-import java.util.regex.*;
 import java.util.*;
+import java.util.stream.*;
+
 class TrainConsistApp {
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        // User input
-        System.out.print("Enter Train ID: ");
-        String trainId = scanner.nextLine();
-        System.out.print("Enter Cargo Code: ");
-        String cargoCode = scanner.nextLine();
-        // ✅ Regex patterns
-        String trainIdRegex = "TRN-\\d{4}";
-        String cargoCodeRegex = "PET-[A-Z]{2}";
-        // ✅ Compile patterns
-        Pattern trainPattern = Pattern.compile(trainIdRegex);
-        Pattern cargoPattern = Pattern.compile(cargoCodeRegex);
-        // ✅ Create matchers
-        Matcher trainMatcher = trainPattern.matcher(trainId);
-        Matcher cargoMatcher = cargoPattern.matcher(cargoCode);
-        // ✅ Validate using matches()
-        boolean isTrainValid = trainMatcher.matches();
-        boolean isCargoValid = cargoMatcher.matches();
-        // ✅ Output results
-        if (isTrainValid) {
-            System.out.println("Train ID is VALID");
+
+        // Sample goods bogies
+        List<GoodsBogie> goodsBogies = new ArrayList<>();
+
+        goodsBogies.add(new GoodsBogie("Cylindrical", "Petroleum"));
+        goodsBogies.add(new GoodsBogie("Rectangular", "Coal"));
+        goodsBogies.add(new GoodsBogie("Open", "Grain"));
+        goodsBogies.add(new GoodsBogie("Cylindrical", "Petroleum"));
+
+        System.out.println("Goods Bogies:");
+        goodsBogies.forEach(System.out::println);
+
+        // ✅ Safety Rule:
+        // Cylindrical bogies must carry ONLY Petroleum
+        boolean isSafe = goodsBogies.stream()
+                .allMatch(b ->
+                        !b.getType().equalsIgnoreCase("Cylindrical")
+                                || b.getCargo().equalsIgnoreCase("Petroleum")
+                );
+
+        // ✅ Result
+        if (isSafe) {
+            System.out.println("\nTrain is SAFETY COMPLIANT ✅");
         } else {
-            System.out.println("Train ID is INVALID (Expected format: TRN-1234)");
+            System.out.println("\nTrain is NOT SAFE ❌ (Invalid cargo in Cylindrical bogie)");
         }
-        if (isCargoValid) {
-            System.out.println("Cargo Code is VALID");
-        } else {
-            System.out.println("Cargo Code is INVALID (Expected format: PET-AB)");
-        }
-        scanner.close();
-    }}
+    }
+}
+
+class GoodsBogie {
+    String type;   // e.g., Cylindrical, Rectangular, Open
+    String cargo;  // e.g., Petroleum, Coal, Grain
+
+    public GoodsBogie(String type, String cargo) {
+        this.type = type;
+        this.cargo = cargo;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getCargo() {
+        return cargo;
+    }
+
+    @Override
+    public String toString() {
+        return "Type: " + type + ", Cargo: " + cargo;
+    }
+}
