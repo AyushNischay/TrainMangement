@@ -1,55 +1,54 @@
 import java.util.*;
-import java.util.stream.*;
-class TrainConsistApp {
-    public static void main(String[] args) {
-        // ✅ Create large dataset
-        List<Bogie> bogies = new ArrayList<>();
-        Random random = new Random();
-        for (int i = 0; i < 100000; i++) {
-            int capacity = 40 + random.nextInt(50); // range: 40–89
-            bogies.add(new Bogie("Passenger", capacity));
-        }
-        // -------------------------------
-        // ✅ Loop-based filtering
-        // -------------------------------
-        long loopStart = System.nanoTime();
-        List<Bogie> loopResult = new ArrayList<>();
-        for (Bogie b : bogies) {
-            if (b.getCapacity() > 60) {
-                loopResult.add(b);
-            }
-        }
-        long loopEnd = System.nanoTime();
-        long loopTime = loopEnd - loopStart;
-        // -------------------------------
-        // ✅ Stream-based filtering
-        // -------------------------------
-        long streamStart = System.nanoTime();
-        List<Bogie> streamResult = bogies.stream()
-                .filter(b -> b.getCapacity() > 60)
-                .collect(Collectors.toList());
-        long streamEnd = System.nanoTime();
-        long streamTime = streamEnd - streamStart;
-        // -------------------------------
-        // ✅ Results
-        // -------------------------------
-        System.out.println("Loop Result Size: " + loopResult.size());
-        System.out.println("Stream Result Size: " + streamResult.size());
-        System.out.println("\nLoop Execution Time (ns): " + loopTime);
-        System.out.println("Stream Execution Time (ns): " + streamTime);
-        // ✅ Consistency check
-        System.out.println("\nResults Match: " +
-                (loopResult.size() == streamResult.size()));
+class InvalidCapacityException extends Exception {
+
+    public InvalidCapacityException(String message) {
+        super(message);
     }
 }
-class Bogie {
+class PassengerBogie {
     String type;
     int capacity;
-    public Bogie(String type, int capacity) {
+
+    public PassengerBogie(String type, int capacity) throws InvalidCapacityException {
+
+        // ✅ Fail-fast validation
+        if (capacity <= 0) {
+            throw new InvalidCapacityException("Capacity must be greater than zero");
+        }
+
         this.type = type;
         this.capacity = capacity;
     }
-    public int getCapacity() {
-        return capacity;
+
+    @Override
+    public String toString() {
+        return "Type: " + type + ", Capacity: " + capacity;
+    }
+}
+
+
+public class TrainConsistApp {
+
+    public static void main(String[] args) {
+
+        List<PassengerBogie> bogies = new ArrayList<>();
+
+        try {
+            // ✅ Valid bogies
+            bogies.add(new PassengerBogie("Sleeper", 72));
+            bogies.add(new PassengerBogie("AC Chair", 60));
+
+            // ❌ Invalid bogie (will throw exception)
+            bogies.add(new PassengerBogie("First Class", 0));
+
+        } catch (InvalidCapacityException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        // Display successfully created bogies
+        System.out.println("\nValid Bogies in Train:");
+        for (PassengerBogie b : bogies) {
+            System.out.println(b);
+        }
     }
 }
